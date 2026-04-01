@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/ImGuiColorTextEdit" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/ImGuiFileDialog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imgui-node-editor" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imgui_club" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imgui-knobs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imguizmo" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/imnodes" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/include/implot" vcs="Git" />
+  </component>
+</project>
