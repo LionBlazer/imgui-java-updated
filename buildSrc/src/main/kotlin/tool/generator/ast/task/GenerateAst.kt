@@ -44,9 +44,6 @@ open class GenerateAst : DefaultTask() {
 
         dstDir.mkdirs()
 
-        val scriptPath = "$dstDir/_gen_ast.sh"
-        File(scriptPath).setExecutable(true)
-
         logger.info("Processing headers...")
 
         headerFiles.forEach { header ->
@@ -73,10 +70,8 @@ open class GenerateAst : DefaultTask() {
             val headerName = header.nameWithoutExtension
             val astBumpJson = File("$astBuildDir/$headerName.json")
 
-            // Call clang++ with the script.
-            // During the process of making an ast-dump there could be errors/warnings.
-            // Thus making a call like that can help to ignore them.
-            callClangAstBump(scriptPath, header, astBumpJson)
+            // Call clang++ directly to make the task work on both Unix and Windows.
+            callClangAstBump(header, astBumpJson)
 
             logger.info("  | Processing an ast-dump result: $astBumpJson...")
 
@@ -405,22 +400,36 @@ open class GenerateAst : DefaultTask() {
         return String.format("%032x", bigInt)
     }
 
-    private fun callClangAstBump(scriptPath: String, srcHeader: File, dstJson: File) {
+    private fun callClangAstBump(srcHeader: File, dstJson: File) {
         fun buildCommand(): List<String> {
+            val imguiIncludeDir = File(project.rootDir, "include/imgui")
             val command = mutableListOf(
-                scriptPath,
-                srcHeader.absolutePath,
-                dstJson.absolutePath,
+                System.getProperty("imgui.clang.executable")
+                    ?: System.getenv("CLANGXX")
+                    ?: "clang++",
+                "-Xclang",
+                "-ast-dump=json",
+                "-fsyntax-only",
+                "-fparse-all-comments",
+                "-fmerge-all-constants",
+                "-I",
+                imguiIncludeDir.absolutePath,
             )
+            if (srcHeader.name == "ImGuizmo.h") {
+                command += listOf("-include", File(imguiIncludeDir, "imgui.h").absolutePath)
+            }
             if (defines.isNotEmpty()) {
                 command += defines.map { "-D$it" }
             }
+            command += srcHeader.absolutePath
             return command
         }
 
         dstJson.delete()
         val pb = ProcessBuilder()
         pb.command(buildCommand())
+        pb.redirectOutput(dstJson)
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT)
         pb.start().waitFor()
     }
 

@@ -367,13 +367,6 @@ public final class ImFontAtlas extends ImGuiStructDestroyable {
     // TexID implemented as SetTexID function
 
     /**
-     * Texture width desired by user before Build(). Must be a power-of-two.
-     * If have many glyphs your graphics API have texture size restrictions you may want to increase texture width to decrease height.
-     */
-    @BindingField
-    public int TexDesiredWidth;
-
-    /**
      * Padding between glyphs within texture in pixels. Defaults to 1.
      * If your rendering method doesn't rely on bilinear filtering you may set this to 0.
      */

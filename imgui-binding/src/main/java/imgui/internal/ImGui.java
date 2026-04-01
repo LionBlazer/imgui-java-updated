@@ -115,8 +115,14 @@ public final class ImGui extends imgui.ImGui {
 
     // Fonts, drawing
 
-    @BindingMethod
-    public static native void SetCurrentFont(ImFont font);
+    public static void setCurrentFont(final ImFont font) {
+        nSetCurrentFont(font.ptr);
+    }
+
+    private static native void nSetCurrentFont(long font); /*
+        ImFont* currentFont = reinterpret_cast<ImFont*>(font);
+        ImGui::SetCurrentFont(currentFont, currentFont ? currentFont->LegacySize : 0.0f, 0.0f);
+    */
 
     @BindingMethod
     public static native ImFont GetDefaultFont();
@@ -137,8 +143,13 @@ public final class ImGui extends imgui.ImGui {
     @BindingMethod
     public static native void UpdateInputEvents(boolean trickleFastInputs);
 
-    @BindingMethod
-    public static native void UpdateHoveredWindowAndCaptureFlags();
+    public static void updateHoveredWindowAndCaptureFlags() {
+        nUpdateHoveredWindowAndCaptureFlags();
+    }
+
+    private static native void nUpdateHoveredWindowAndCaptureFlags(); /*
+        ImGui::UpdateHoveredWindowAndCaptureFlags(ImGui::GetIO().MousePos);
+    */
 
     @BindingMethod
     public static native void StartMouseMovingWindow(ImGuiWindow window);
@@ -264,8 +275,35 @@ public final class ImGui extends imgui.ImGui {
     @BindingMethod
     public static native boolean IsItemToggledSelection();
 
-    @BindingMethod
-    public static native ImVec2 GetContentRegionMaxAbs();
+    public static ImVec2 getContentRegionMaxAbs() {
+        final ImVec2 dst = new ImVec2();
+        nGetContentRegionMaxAbs(dst);
+        return dst;
+    }
+
+    public static float getContentRegionMaxAbsX() {
+        return nGetContentRegionMaxAbsX();
+    }
+
+    public static float getContentRegionMaxAbsY() {
+        return nGetContentRegionMaxAbsY();
+    }
+
+    public static void getContentRegionMaxAbs(final ImVec2 dst) {
+        nGetContentRegionMaxAbs(dst);
+    }
+
+    private static native void nGetContentRegionMaxAbs(ImVec2 dst); /*
+        Jni::ImVec2Cpy(env, ImGui::GetCurrentWindowRead()->ContentRegionRect.Max, dst);
+    */
+
+    private static native float nGetContentRegionMaxAbsX(); /*
+        return ImGui::GetCurrentWindowRead()->ContentRegionRect.Max.x;
+    */
+
+    private static native float nGetContentRegionMaxAbsY(); /*
+        return ImGui::GetCurrentWindowRead()->ContentRegionRect.Max.y;
+    */
 
     // TODO: ShrinkWidths
 

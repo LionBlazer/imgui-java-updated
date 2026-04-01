@@ -1124,11 +1124,160 @@ public class ImGui {
     // Widgets: Images
     // - Read about ImTextureID here: https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 
-    @BindingMethod
-    public static native void Image(@ArgValue(callPrefix = "(ImTextureID)(uintptr_t)") long userTextureId, ImVec2 imageSize, @OptArg ImVec2 uv0, @OptArg ImVec2 uv1, @OptArg ImVec4 tintCol, @OptArg ImVec4 borderCol);
+    public static void image(final long userTextureId, final ImVec2 imageSize) {
+        nImage(userTextureId, imageSize.x, imageSize.y);
+    }
 
-    @BindingMethod
-    public static native boolean ImageButton(String strId, @ArgValue(callPrefix = "(ImTextureID)(uintptr_t)") long userTextureId, ImVec2 imageSize, @OptArg ImVec2 uv0, @OptArg ImVec2 uv1, @OptArg ImVec4 bgCol, @OptArg ImVec4 tintCol);
+    public static void image(final long userTextureId, final float imageSizeX, final float imageSizeY) {
+        nImage(userTextureId, imageSizeX, imageSizeY);
+    }
+
+    public static void image(final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0) {
+        nImage(userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y);
+    }
+
+    public static void image(final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y) {
+        nImage(userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y);
+    }
+
+    public static void image(final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1) {
+        nImage(userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y);
+    }
+
+    public static void image(final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y) {
+        nImage(userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y);
+    }
+
+    public static void image(final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1, final ImVec4 tintCol) {
+        nImage(userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y, tintCol.x, tintCol.y, tintCol.z, tintCol.w);
+    }
+
+    public static void image(final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y, final float tintColX, final float tintColY, final float tintColZ, final float tintColW) {
+        nImage(userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y, tintColX, tintColY, tintColZ, tintColW);
+    }
+
+    public static void image(final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1, final ImVec4 tintCol, final ImVec4 borderCol) {
+        nImage(userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y, tintCol.x, tintCol.y, tintCol.z, tintCol.w, borderCol.x, borderCol.y, borderCol.z, borderCol.w);
+    }
+
+    public static void image(final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y, final float tintColX, final float tintColY, final float tintColZ, final float tintColW, final float borderColX, final float borderColY, final float borderColZ, final float borderColW) {
+        nImage(userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y, tintColX, tintColY, tintColZ, tintColW, borderColX, borderColY, borderColZ, borderColW);
+    }
+
+    private static native void nImage(long userTextureId, float imageSizeX, float imageSizeY); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImGui::Image(ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize);
+    */
+
+    private static native void nImage(long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImGui::Image(ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0);
+    */
+
+    private static native void nImage(long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        ImGui::Image(ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1);
+    */
+
+    private static native void nImage(long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y, float tintColX, float tintColY, float tintColZ, float tintColW); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        ImVec4 tintCol = ImVec4(tintColX, tintColY, tintColZ, tintColW);
+        ImGui::ImageWithBg(ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1, ImVec4(0, 0, 0, 0), tintCol);
+    */
+
+    private static native void nImage(long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y, float tintColX, float tintColY, float tintColZ, float tintColW, float borderColX, float borderColY, float borderColZ, float borderColW); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        ImVec4 tintCol = ImVec4(tintColX, tintColY, tintColZ, tintColW);
+        ImVec4 borderCol = ImVec4(borderColX, borderColY, borderColZ, borderColW);
+        ImGui::Image(ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1, tintCol, borderCol);
+    */
+
+    public static boolean imageButton(final String strId, final long userTextureId, final ImVec2 imageSize) {
+        return nImageButton(strId, userTextureId, imageSize.x, imageSize.y);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final float imageSizeX, final float imageSizeY) {
+        return nImageButton(strId, userTextureId, imageSizeX, imageSizeY);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0) {
+        return nImageButton(strId, userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y) {
+        return nImageButton(strId, userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1) {
+        return nImageButton(strId, userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y) {
+        return nImageButton(strId, userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1, final ImVec4 bgCol) {
+        return nImageButton(strId, userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y, bgCol.x, bgCol.y, bgCol.z, bgCol.w);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y, final float bgColX, final float bgColY, final float bgColZ, final float bgColW) {
+        return nImageButton(strId, userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y, bgColX, bgColY, bgColZ, bgColW);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final ImVec2 imageSize, final ImVec2 uv0, final ImVec2 uv1, final ImVec4 bgCol, final ImVec4 tintCol) {
+        return nImageButton(strId, userTextureId, imageSize.x, imageSize.y, uv0.x, uv0.y, uv1.x, uv1.y, bgCol.x, bgCol.y, bgCol.z, bgCol.w, tintCol.x, tintCol.y, tintCol.z, tintCol.w);
+    }
+
+    public static boolean imageButton(final String strId, final long userTextureId, final float imageSizeX, final float imageSizeY, final float uv0X, final float uv0Y, final float uv1X, final float uv1Y, final float bgColX, final float bgColY, final float bgColZ, final float bgColW, final float tintColX, final float tintColY, final float tintColZ, final float tintColW) {
+        return nImageButton(strId, userTextureId, imageSizeX, imageSizeY, uv0X, uv0Y, uv1X, uv1Y, bgColX, bgColY, bgColZ, bgColW, tintColX, tintColY, tintColZ, tintColW);
+    }
+
+    private static native boolean nImageButton(String strId, long userTextureId, float imageSizeX, float imageSizeY); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        auto _result = ImGui::ImageButton(strId, ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize);
+        return _result;
+    */
+
+    private static native boolean nImageButton(String strId, long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        auto _result = ImGui::ImageButton(strId, ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0);
+        return _result;
+    */
+
+    private static native boolean nImageButton(String strId, long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        auto _result = ImGui::ImageButton(strId, ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1);
+        return _result;
+    */
+
+    private static native boolean nImageButton(String strId, long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y, float bgColX, float bgColY, float bgColZ, float bgColW); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        ImVec4 bgCol = ImVec4(bgColX, bgColY, bgColZ, bgColW);
+        auto _result = ImGui::ImageButton(strId, ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1, bgCol);
+        return _result;
+    */
+
+    private static native boolean nImageButton(String strId, long userTextureId, float imageSizeX, float imageSizeY, float uv0X, float uv0Y, float uv1X, float uv1Y, float bgColX, float bgColY, float bgColZ, float bgColW, float tintColX, float tintColY, float tintColZ, float tintColW); /*
+        ImVec2 imageSize = ImVec2(imageSizeX, imageSizeY);
+        ImVec2 uv0 = ImVec2(uv0X, uv0Y);
+        ImVec2 uv1 = ImVec2(uv1X, uv1Y);
+        ImVec4 bgCol = ImVec4(bgColX, bgColY, bgColZ, bgColW);
+        ImVec4 tintCol = ImVec4(tintColX, tintColY, tintColZ, tintColW);
+        auto _result = ImGui::ImageButton(strId, ImTextureRef((ImTextureID)(uintptr_t)userTextureId), imageSize, uv0, uv1, bgCol, tintCol);
+        return _result;
+    */
 
 
     // Widgets: Combo Box (Dropdown)

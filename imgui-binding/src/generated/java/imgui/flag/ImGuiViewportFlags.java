@@ -1,9 +1,12 @@
 package imgui.flag;
 
 
+
+
 /**
  * Flags stored in ImGuiViewport::Flags, giving indications to the platform backends.
  */
+
 public final class ImGuiViewportFlags {
     private ImGuiViewportFlags() {
     }
@@ -28,7 +31,7 @@ public final class ImGuiViewportFlags {
     public static final int IsPlatformMonitor = 2;
 
     /**
-     * Platform Window: Was created/managed by the user application? (rather than our backend)
+     * Platform Window: Is created/managed by the user application? (rather than our backend)
      *
      * <p>Definition: {@code 1 << 2}
      */

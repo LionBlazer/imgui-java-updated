@@ -6,9 +6,14 @@ import imgui.ImGuiPlatformMonitor;
 import imgui.ImGuiViewport;
 import imgui.ImVec2;
 import imgui.ImVec4;
+
+
+
+
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+
 
 public final class ImGui extends imgui.ImGui {
     /*JNI
@@ -350,7 +355,8 @@ public final class ImGui extends imgui.ImGui {
     }
 
     private static native void nSetCurrentFont(long font); /*
-        ImGui::SetCurrentFont(reinterpret_cast<ImFont*>(font));
+        ImFont* currentFont = reinterpret_cast<ImFont*>(font);
+        ImGui::SetCurrentFont(currentFont, currentFont ? currentFont->LegacySize : 0.0f, 0.0f);
     */
 
     public static ImFont getDefaultFont() {
@@ -402,7 +408,7 @@ public final class ImGui extends imgui.ImGui {
     }
 
     private static native void nUpdateHoveredWindowAndCaptureFlags(); /*
-        ImGui::UpdateHoveredWindowAndCaptureFlags();
+        ImGui::UpdateHoveredWindowAndCaptureFlags(ImGui::GetIO().MousePos);
     */
 
     public static void startMouseMovingWindow(final ImGuiWindow window) {
@@ -923,15 +929,15 @@ public final class ImGui extends imgui.ImGui {
     }
 
     private static native void nGetContentRegionMaxAbs(ImVec2 dst); /*
-        Jni::ImVec2Cpy(env, ImGui::GetContentRegionMaxAbs(), dst);
+        Jni::ImVec2Cpy(env, ImGui::GetCurrentWindowRead()->ContentRegionRect.Max, dst);
     */
 
     private static native float nGetContentRegionMaxAbsX(); /*
-        return ImGui::GetContentRegionMaxAbs().x;
+        return ImGui::GetCurrentWindowRead()->ContentRegionRect.Max.x;
     */
 
     private static native float nGetContentRegionMaxAbsY(); /*
-        return ImGui::GetContentRegionMaxAbs().y;
+        return ImGui::GetCurrentWindowRead()->ContentRegionRect.Max.y;
     */
 
     // TODO: ShrinkWidths
@@ -1014,7 +1020,7 @@ public final class ImGui extends imgui.ImGui {
         return ImGui::DockBuilderAddNode(nodeId, flags);
     */
 
-    /**
+     /**
      * Remove node and all its child, undock all windows.
      */
     public static void dockBuilderRemoveNode(final int nodeId) {
@@ -1041,7 +1047,7 @@ public final class ImGui extends imgui.ImGui {
         ImGui::DockBuilderRemoveNodeDockedWindows(nodeId, clearSettingsRefs);
     */
 
-    /**
+     /**
      * Remove all split/hierarchy. All remaining docked windows will be re-docked to the remaining root node (node_id).
      */
     public static void dockBuilderRemoveNodeChildNodes(final int nodeId) {
@@ -1078,7 +1084,7 @@ public final class ImGui extends imgui.ImGui {
         ImGui::DockBuilderSetNodeSize(nodeId, size);
     */
 
-    /**
+     /**
      * Create 2 child nodes in this parent node.
      */
     public static int dockBuilderSplitNode(final int nodeId, final int splitDir, final float sizeRatioForNodeAtDir, final ImInt outIdAtDir, final ImInt outIdAtOppositeDir) {
@@ -1150,7 +1156,7 @@ public final class ImGui extends imgui.ImGui {
         ImGui::TableSetColumnSortDirection(columnN, static_cast<ImGuiSortDirection>(sortDirection), appendToSortSpecs);
     */
 
-    /**
+     /**
      * May use {@code (TableGetColumnFlags() & ImGuiTableColumnFlags_IsHovered)} instead. Return hovered column.
      * Return -1 when table is not hovered. return columns_count if the unused space at the right of visible columns is hovered.
      */
@@ -1162,7 +1168,7 @@ public final class ImGui extends imgui.ImGui {
         return ImGui::TableGetHoveredColumn();
     */
 
-    /**
+     /**
      * Retrieve *PREVIOUS FRAME* hovered row. This difference with TableGetHoveredColumn() is the reason why this is not public yet.
      */
     public static int tableGetHoveredRow() {

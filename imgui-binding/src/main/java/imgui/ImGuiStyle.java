@@ -209,7 +209,7 @@ public final class ImGuiStyle extends ImGuiStructDestroyable {
      * Minimum width for close button to appear on an unselected tab when hovered.
      * Set to 0.0f to always show when hovering, set to FLT_MAX to never show close button unless selected.
      */
-    @BindingField
+    @BindingField(callName = "TabCloseButtonMinWidthUnselected")
     public float TabMinWidthForCloseButton;
 
     /**

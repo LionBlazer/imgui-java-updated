@@ -342,13 +342,6 @@ public final class ImGuiIO extends ImGuiStruct {
         THIS->GetClipboardTextFn = getClipboardTextStub;
     */
 
-    /**
-     * Optional: Platform locale
-     * [Experimental] Configure decimal point e.g. '.' or ',' useful for some languages (e.g. German), generally pulled from {@code *localeconv()->decimal_point}
-     */
-    @BindingField
-    public short PlatformLocaleDecimalPoint;
-
     //------------------------------------------------------------------
     // Input - Call before calling NewFrame()
     //------------------------------------------------------------------
@@ -625,7 +618,7 @@ public final class ImGuiIO extends ImGuiStruct {
      * Key state for all known keys. Use IsKeyXXX() functions to access this.
      */
     @BindingField
-    @TypeArray(type = "ImGuiKeyData", size = "ImGuiKey_KeysData_SIZE")
+    @TypeArray(type = "ImGuiKeyData", size = "ImGuiKey_NamedKey_COUNT")
     public ImGuiKeyData[] KeysData;
 
     /**
@@ -761,18 +754,6 @@ public final class ImGuiIO extends ImGuiStruct {
      */
     @BindingField(accessors = BindingField.Accessor.GETTER)
     public boolean AppAcceptingEvents;
-
-    /**
-     * -1: unknown, 0: using AddKeyEvent(), 1: using legacy io.KeysDown[]
-     */
-    @BindingField
-    public short BackendUsingLegacyKeyArrays;
-
-    /**
-     * 0: using AddKeyAnalogEvent(), 1: writing to legacy io.NavInputs[] directly
-     */
-    @BindingField
-    public boolean BackendUsingLegacyNavInputArray;
 
     /**
      * For AddInputCharacterUTF16

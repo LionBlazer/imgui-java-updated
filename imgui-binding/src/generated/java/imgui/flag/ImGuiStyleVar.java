@@ -1,6 +1,8 @@
 package imgui.flag;
 
 
+
+
 /**
  * Enumeration for PushStyleVar() / PopStyleVar() to temporarily modify the ImGuiStyle structure.
  * - The enum only refers to fields of ImGuiStyle which makes sense to be pushed/popped inside UI code.
@@ -10,6 +12,7 @@ package imgui.flag;
  *   With Visual Assist installed: ALT+G ("VAssistX.GoToImplementation") can also follow symbols in comments.
  * - When changing this enum, you need to update the associated internal table GStyleVarInfo[] accordingly. This is where we link enum values to members offset/type.
  */
+
 public final class ImGuiStyleVar {
     private ImGuiStyleVar() {
     }
@@ -115,69 +118,104 @@ public final class ImGuiStyleVar {
     public static final int ScrollbarRounding = 19;
 
     /**
+     * float     ScrollbarPadding
+     */
+    public static final int ScrollbarPadding = 20;
+
+    /**
      * float     GrabMinSize
      */
-    public static final int GrabMinSize = 20;
+    public static final int GrabMinSize = 21;
 
     /**
      * float     GrabRounding
      */
-    public static final int GrabRounding = 21;
+    public static final int GrabRounding = 22;
+
+    /**
+     * float     ImageBorderSize
+     */
+    public static final int ImageBorderSize = 23;
 
     /**
      * float     TabRounding
      */
-    public static final int TabRounding = 22;
+    public static final int TabRounding = 24;
 
     /**
      * float     TabBorderSize
      */
-    public static final int TabBorderSize = 23;
+    public static final int TabBorderSize = 25;
+
+    /**
+     * float     TabMinWidthBase
+     */
+    public static final int TabMinWidthBase = 26;
+
+    /**
+     * float     TabMinWidthShrink
+     */
+    public static final int TabMinWidthShrink = 27;
 
     /**
      * float     TabBarBorderSize
      */
-    public static final int TabBarBorderSize = 24;
+    public static final int TabBarBorderSize = 28;
+
+    /**
+     * float     TabBarOverlineSize
+     */
+    public static final int TabBarOverlineSize = 29;
 
     /**
      * float     TableAngledHeadersAngle
      */
-    public static final int TableAngledHeadersAngle = 25;
+    public static final int TableAngledHeadersAngle = 30;
 
     /**
      * ImVec2  TableAngledHeadersTextAlign
      */
-    public static final int TableAngledHeadersTextAlign = 26;
+    public static final int TableAngledHeadersTextAlign = 31;
+
+    /**
+     * float     TreeLinesSize
+     */
+    public static final int TreeLinesSize = 32;
+
+    /**
+     * float     TreeLinesRounding
+     */
+    public static final int TreeLinesRounding = 33;
 
     /**
      * ImVec2    ButtonTextAlign
      */
-    public static final int ButtonTextAlign = 27;
+    public static final int ButtonTextAlign = 34;
 
     /**
      * ImVec2    SelectableTextAlign
      */
-    public static final int SelectableTextAlign = 28;
+    public static final int SelectableTextAlign = 35;
 
     /**
      * float     SeparatorTextBorderSize
      */
-    public static final int SeparatorTextBorderSize = 29;
+    public static final int SeparatorTextBorderSize = 36;
 
     /**
      * ImVec2    SeparatorTextAlign
      */
-    public static final int SeparatorTextAlign = 30;
+    public static final int SeparatorTextAlign = 37;
 
     /**
      * ImVec2    SeparatorTextPadding
      */
-    public static final int SeparatorTextPadding = 31;
+    public static final int SeparatorTextPadding = 38;
 
     /**
      * float     DockingSeparatorSize
      */
-    public static final int DockingSeparatorSize = 32;
+    public static final int DockingSeparatorSize = 39;
 
-    public static final int COUNT = 33;
+    public static final int COUNT = 40;
 }

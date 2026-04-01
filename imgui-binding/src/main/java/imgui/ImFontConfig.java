@@ -94,12 +94,6 @@ public final class ImFontConfig extends ImGuiStructDestroyable {
     public boolean PixelSnapH;
 
     /**
-     * Extra spacing (in pixels) between glyphs. Only X axis is supported for now.
-     */
-    @BindingField
-    public ImVec2 GlyphExtraSpacing;
-
-    /**
      * Offset all glyphs from this font input.
      */
     @BindingField
@@ -150,7 +144,7 @@ public final class ImFontConfig extends ImGuiStructDestroyable {
     /**
      * Settings for custom font builder. THIS IS BUILDER IMPLEMENTATION DEPENDENT. Leave as zero if unsure.
      */
-    @BindingField(isFlag = true)
+    @BindingField(isFlag = true, callName = "FontLoaderFlags")
     public int FontBuilderFlags;
 
     /**

@@ -3,8 +3,8 @@ package imgui;
 import imgui.binding.ImGuiStructDestroyable;
 
 /**
- * Font runtime data and rendering
- * ImFontAtlas automatically loads a default embedded font for you when you call GetTexDataAsAlpha8() or GetTexDataAsRGBA32().
+ * Font runtime data and rendering.
+ * In Dear ImGui 1.92+, a font may be baked at multiple sizes. Size-specific data lives in {@link ImFontBaked}.
  */
 public final class ImFont extends ImGuiStructDestroyable {
     public ImFont() {
@@ -29,103 +29,39 @@ public final class ImFont extends ImGuiStructDestroyable {
         return (uintptr_t)(new ImFont());
     */
 
-    // TODO IndexAdvanceX
-
     /**
-     * = FallbackGlyph.AdvanceX
+     * Current rasterizer density. This is a varying state of the font.
      */
-    public float getFallbackAdvanceX() {
-        return nGetFallbackAdvanceX();
+    public float getCurrentRasterizerDensity() {
+        return nGetCurrentRasterizerDensity();
     }
 
-    /**
-     * = FallbackGlyph.AdvanceX
-     */
-    public void setFallbackAdvanceX(final float value) {
-        nSetFallbackAdvanceX(value);
-    }
-
-    private native float nGetFallbackAdvanceX(); /*
-        return THIS->FallbackAdvanceX;
-    */
-
-    private native void nSetFallbackAdvanceX(float value); /*
-        THIS->FallbackAdvanceX = value;
+    private native float nGetCurrentRasterizerDensity(); /*
+        return THIS->CurrentRasterizerDensity;
     */
 
     /**
-     * Height of characters/line, set during loading (don't change after loading)
+     * Legacy size originally passed to AddFont().
+     * In 1.92+, size-specific glyph data is stored in ImFontBaked.
      */
     public float getFontSize() {
         return nGetFontSize();
     }
 
     /**
-     * Height of characters/line, set during loading (don't change after loading)
+     * Legacy size originally passed to AddFont().
+     * In 1.92+, size-specific glyph data is stored in ImFontBaked.
      */
     public void setFontSize(final float value) {
         nSetFontSize(value);
     }
 
     private native float nGetFontSize(); /*
-        return THIS->FontSize;
+        return THIS->LegacySize;
     */
 
     private native void nSetFontSize(float value); /*
-        THIS->FontSize = value;
-    */
-
-    // TODO IndexLookup, Glyphs
-
-    private static final ImFontGlyph _GETFALLBACKGLYPH_1 = new ImFontGlyph(0);
-
-    /**
-     * = FindGlyph(FontFallbackChar)
-     */
-    public ImFontGlyph getFallbackGlyph() {
-        _GETFALLBACKGLYPH_1.ptr = nGetFallbackGlyph();
-        return _GETFALLBACKGLYPH_1;
-    }
-
-    /**
-     * = FindGlyph(FontFallbackChar)
-     */
-    public void setFallbackGlyph(final ImFontGlyph value) {
-        nSetFallbackGlyph(value.ptr);
-    }
-
-    private native long nGetFallbackGlyph(); /*
-        return (uintptr_t)THIS->FallbackGlyph;
-    */
-
-    private native void nSetFallbackGlyph(long value); /*
-        THIS->FallbackGlyph = reinterpret_cast<ImFontGlyph*>(value);
-    */
-
-    // TODO ContainerAtlas, ConfigData
-
-    /**
-     * Number of ImFontConfig involved in creating this font.
-     * Bigger than 1 when merging multiple font sources into one ImFont.
-     */
-    public short getConfigDataCount() {
-        return nGetConfigDataCount();
-    }
-
-    /**
-     * Number of ImFontConfig involved in creating this font.
-     * Bigger than 1 when merging multiple font sources into one ImFont.
-     */
-    public void setConfigDataCount(final short value) {
-        nSetConfigDataCount(value);
-    }
-
-    private native short nGetConfigDataCount(); /*
-        return THIS->ConfigDataCount;
-    */
-
-    private native void nSetConfigDataCount(short value); /*
-        THIS->ConfigDataCount = value;
+        THIS->LegacySize = value;
     */
 
     /**
@@ -150,79 +86,37 @@ public final class ImFont extends ImGuiStructDestroyable {
         THIS->EllipsisChar = value;
     */
 
-    public short getEllipsisCharCount() {
-        return nGetEllipsisCharCount();
+    /**
+     * Character used if a glyph isn't found.
+     */
+    public short getFallbackChar() {
+        return nGetFallbackChar();
     }
 
-    public void setEllipsisCharCount(final short value) {
-        nSetEllipsisCharCount(value);
+    /**
+     * Character used if a glyph isn't found.
+     */
+    public void setFallbackChar(final short value) {
+        nSetFallbackChar(value);
     }
 
-    private native short nGetEllipsisCharCount(); /*
-        return THIS->EllipsisCharCount;
+    private native short nGetFallbackChar(); /*
+        return THIS->FallbackChar;
     */
 
-    private native void nSetEllipsisCharCount(short value); /*
-        THIS->EllipsisCharCount = value;
-    */
-
-    public float getEllipsisWidth() {
-        return nGetEllipsisWidth();
-    }
-
-    public void setEllipsisWidth(final float value) {
-        nSetEllipsisWidth(value);
-    }
-
-    private native float nGetEllipsisWidth(); /*
-        return THIS->EllipsisWidth;
-    */
-
-    private native void nSetEllipsisWidth(float value); /*
-        THIS->EllipsisWidth = value;
-    */
-
-    public float getEllipsisCharStep() {
-        return nGetEllipsisCharStep();
-    }
-
-    public void setEllipsisCharStep(final float value) {
-        nSetEllipsisCharStep(value);
-    }
-
-    private native float nGetEllipsisCharStep(); /*
-        return THIS->EllipsisCharStep;
-    */
-
-    private native void nSetEllipsisCharStep(float value); /*
-        THIS->EllipsisCharStep = value;
-    */
-
-    public boolean getDirtyLookupTables() {
-        return nGetDirtyLookupTables();
-    }
-
-    public void setDirtyLookupTables(final boolean value) {
-        nSetDirtyLookupTables(value);
-    }
-
-    private native boolean nGetDirtyLookupTables(); /*
-        return THIS->DirtyLookupTables;
-    */
-
-    private native void nSetDirtyLookupTables(boolean value); /*
-        THIS->DirtyLookupTables = value;
+    private native void nSetFallbackChar(short value); /*
+        THIS->FallbackChar = value;
     */
 
     /**
-     * Base font scale, multiplied by the per-window font scale which you can adjust with SetWindowFontScale()
+     * Legacy base font scale, multiplied by the per-window font scale.
      */
     public float getScale() {
         return nGetScale();
     }
 
     /**
-     * Base font scale, multiplied by the per-window font scale which you can adjust with SetWindowFontScale()
+     * Legacy base font scale, multiplied by the per-window font scale.
      */
     public void setScale(final float value) {
         nSetScale(value);
@@ -236,90 +130,12 @@ public final class ImFont extends ImGuiStructDestroyable {
         THIS->Scale = value;
     */
 
-    /**
-     * Ascent: distance from top to bottom of e.g. 'A' [0..FontSize]
-     */
-    public float getAscent() {
-        return nGetAscent();
+    public boolean isGlyphInFont(final int c) {
+        return nIsGlyphInFont(c);
     }
 
-    /**
-     * Ascent: distance from top to bottom of e.g. 'A' [0..FontSize]
-     */
-    public void setAscent(final float value) {
-        nSetAscent(value);
-    }
-
-    private native float nGetAscent(); /*
-        return THIS->Ascent;
-    */
-
-    private native void nSetAscent(float value); /*
-        THIS->Ascent = value;
-    */
-
-    public float getDescent() {
-        return nGetDescent();
-    }
-
-    public void setDescent(final float value) {
-        nSetDescent(value);
-    }
-
-    private native float nGetDescent(); /*
-        return THIS->Descent;
-    */
-
-    private native void nSetDescent(float value); /*
-        THIS->Descent = value;
-    */
-
-    /**
-     * Total surface in pixels to get an idea of the font rasterization/texture cost (not exact, we approximate the cost of padding between glyphs)
-     */
-    public int getMetricsTotalSurface() {
-        return nGetMetricsTotalSurface();
-    }
-
-    /**
-     * Total surface in pixels to get an idea of the font rasterization/texture cost (not exact, we approximate the cost of padding between glyphs)
-     */
-    public void setMetricsTotalSurface(final int value) {
-        nSetMetricsTotalSurface(value);
-    }
-
-    private native int nGetMetricsTotalSurface(); /*
-        return THIS->MetricsTotalSurface;
-    */
-
-    private native void nSetMetricsTotalSurface(int value); /*
-        THIS->MetricsTotalSurface = value;
-    */
-
-    // Methods
-
-    public ImFontGlyph findGlyph(final int c) {
-        return new ImFontGlyph(nFindGlyph(c));
-    }
-
-    private native long nFindGlyph(int c); /*
-        return (uintptr_t)THIS->FindGlyph((ImWchar)c);
-    */
-
-    public ImFontGlyph findGlyphNoFallback(final int c) {
-        return new ImFontGlyph(nFindGlyphNoFallback(c));
-    }
-
-    private native long nFindGlyphNoFallback(int c); /*
-        return (uintptr_t)THIS->FindGlyphNoFallback((ImWchar)c);
-    */
-
-    public float getCharAdvance(final int c) {
-        return nGetCharAdvance(c);
-    }
-
-    private native float nGetCharAdvance(int c); /*
-        return THIS->GetCharAdvance((ImWchar)c);
+    private native boolean nIsGlyphInFont(int c); /*
+        return THIS->IsGlyphInFont((ImWchar)c);
     */
 
     public boolean isLoaded() {
@@ -340,7 +156,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public ImVec2 calcTextSizeA(final float size, final float maxWidth, final float wrapWidth, final String textBegin) {
         final ImVec2 dst = new ImVec2();
@@ -350,7 +166,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public float calcTextSizeAX(final float size, final float maxWidth, final float wrapWidth, final String textBegin) {
         return nCalcTextSizeAX(size, maxWidth, wrapWidth, textBegin);
@@ -358,7 +174,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public float calcTextSizeAY(final float size, final float maxWidth, final float wrapWidth, final String textBegin) {
         return nCalcTextSizeAY(size, maxWidth, wrapWidth, textBegin);
@@ -366,7 +182,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public void calcTextSizeA(final ImVec2 dst, final float size, final float maxWidth, final float wrapWidth, final String textBegin) {
         nCalcTextSizeA(dst, size, maxWidth, wrapWidth, textBegin);
@@ -374,7 +190,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public ImVec2 calcTextSizeA(final float size, final float maxWidth, final float wrapWidth, final String textBegin, final String textEnd) {
         final ImVec2 dst = new ImVec2();
@@ -384,7 +200,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public float calcTextSizeAX(final float size, final float maxWidth, final float wrapWidth, final String textBegin, final String textEnd) {
         return nCalcTextSizeAX(size, maxWidth, wrapWidth, textBegin, textEnd);
@@ -392,7 +208,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public float calcTextSizeAY(final float size, final float maxWidth, final float wrapWidth, final String textBegin, final String textEnd) {
         return nCalcTextSizeAY(size, maxWidth, wrapWidth, textBegin, textEnd);
@@ -400,7 +216,7 @@ public final class ImFont extends ImGuiStructDestroyable {
 
     /**
      * 'max_width' stops rendering after a certain width (could be turned into a 2d size). FLT_MAX to disable.
-     * 'wrap_width' enable automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
+     * 'wrap_width' enables automatic word-wrapping across multiple lines to fit into given width. 0.0f to disable.
      */
     public void calcTextSizeA(final ImVec2 dst, final float size, final float maxWidth, final float wrapWidth, final String textBegin, final String textEnd) {
         nCalcTextSizeA(dst, size, maxWidth, wrapWidth, textBegin, textEnd);
@@ -452,17 +268,49 @@ public final class ImFont extends ImGuiStructDestroyable {
         return _result;
     */
 
+    public ImFontBaked getFontBaked(final float fontSize) {
+        return new ImFontBaked(nGetFontBaked(fontSize, -1.0f));
+    }
+
+    public ImFontBaked getFontBaked(final float fontSize, final float density) {
+        return new ImFontBaked(nGetFontBaked(fontSize, density));
+    }
+
+    private native long nGetFontBaked(float fontSize, float density); /*
+        return (uintptr_t)THIS->GetFontBaked(fontSize, density);
+    */
+
+    /**
+     * Returns the first position where a wrapped line should stop for the given baked size.
+     */
+    public String calcWordWrapPosition(final float size, final String text, final String textEnd, final float wrapWidth) {
+        return nCalcWordWrapPosition(size, text, textEnd, wrapWidth);
+    }
+
+    private native String nCalcWordWrapPosition(float size, String objText, String objTextEnd, float wrapWidth); /*MANUAL
+        auto text = objText == NULL ? NULL : (char*)env->GetStringUTFChars(objText, JNI_FALSE);
+        auto textEnd = objTextEnd == NULL ? NULL : (char*)env->GetStringUTFChars(objTextEnd, JNI_FALSE);
+        auto result = env->NewStringUTF(THIS->CalcWordWrapPosition(size, text, textEnd, wrapWidth));
+        if (text != NULL) env->ReleaseStringUTFChars(objText, text);
+        if (textEnd != NULL) env->ReleaseStringUTFChars(objTextEnd, textEnd);
+        return result;
+    */
+
+    /**
+     * Legacy wrapper preserved for source compatibility.
+     * It scales the current legacy size and forwards to CalcWordWrapPosition().
+     */
     public String calcWordWrapPositionA(final float scale, final String text, final String textEnd, final float wrapWidth) {
         return nCalcWordWrapPositionA(scale, text, textEnd, wrapWidth);
     }
 
-    private native String nCalcWordWrapPositionA(float scale, String obj_text, String obj_textEnd, float wrapWidth); /*MANUAL
-        auto text = obj_text == NULL ? NULL : (char*)env->GetStringUTFChars(obj_text, JNI_FALSE);
-        auto textEnd = obj_textEnd == NULL ? NULL : (char*)env->GetStringUTFChars(obj_textEnd, JNI_FALSE);
-        auto _result = env->NewStringUTF(THIS->CalcWordWrapPositionA(scale, text, textEnd, wrapWidth));
-        if (text != NULL) env->ReleaseStringUTFChars(obj_text, text);
-        if (textEnd != NULL) env->ReleaseStringUTFChars(obj_textEnd, textEnd);
-        return _result;
+    private native String nCalcWordWrapPositionA(float scale, String objText, String objTextEnd, float wrapWidth); /*MANUAL
+        auto text = objText == NULL ? NULL : (char*)env->GetStringUTFChars(objText, JNI_FALSE);
+        auto textEnd = objTextEnd == NULL ? NULL : (char*)env->GetStringUTFChars(objTextEnd, JNI_FALSE);
+        auto result = env->NewStringUTF(THIS->CalcWordWrapPosition(THIS->LegacySize * scale, text, textEnd, wrapWidth));
+        if (text != NULL) env->ReleaseStringUTFChars(objText, text);
+        if (textEnd != NULL) env->ReleaseStringUTFChars(objTextEnd, textEnd);
+        return result;
     */
 
     public void renderChar(final ImDrawList drawList, final float size, final ImVec2 pos, final int col, final int c) {
@@ -494,20 +342,40 @@ public final class ImFont extends ImGuiStructDestroyable {
         nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, wrapWidth);
     }
 
+    public void renderText(final ImDrawList drawList, final float size, final ImVec2 pos, final int col, final ImVec4 clipRect, final String textBegin, final String textEnd, final float wrapWidth, final int flags) {
+        nRenderText(drawList.ptr, size, pos.x, pos.y, col, clipRect.x, clipRect.y, clipRect.z, clipRect.w, textBegin, textEnd, wrapWidth, flags);
+    }
+
+    public void renderText(final ImDrawList drawList, final float size, final float posX, final float posY, final int col, final float clipRectX, final float clipRectY, final float clipRectZ, final float clipRectW, final String textBegin, final String textEnd, final float wrapWidth, final int flags) {
+        nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, wrapWidth, flags);
+    }
+
+    /**
+     * Compatibility overload preserved for older code. cpuFineClip no longer maps to Dear ImGui 1.92 RenderText flags and is ignored.
+     */
     public void renderText(final ImDrawList drawList, final float size, final ImVec2 pos, final int col, final ImVec4 clipRect, final String textBegin, final String textEnd, final float wrapWidth, final boolean cpuFineClip) {
-        nRenderText(drawList.ptr, size, pos.x, pos.y, col, clipRect.x, clipRect.y, clipRect.z, clipRect.w, textBegin, textEnd, wrapWidth, cpuFineClip);
+        nRenderText(drawList.ptr, size, pos.x, pos.y, col, clipRect.x, clipRect.y, clipRect.z, clipRect.w, textBegin, textEnd, wrapWidth, 0);
     }
 
+    /**
+     * Compatibility overload preserved for older code. cpuFineClip no longer maps to Dear ImGui 1.92 RenderText flags and is ignored.
+     */
     public void renderText(final ImDrawList drawList, final float size, final float posX, final float posY, final int col, final float clipRectX, final float clipRectY, final float clipRectZ, final float clipRectW, final String textBegin, final String textEnd, final float wrapWidth, final boolean cpuFineClip) {
-        nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, wrapWidth, cpuFineClip);
+        nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, wrapWidth, 0);
     }
 
+    /**
+     * Compatibility overload preserved for older code. cpuFineClip no longer maps to Dear ImGui 1.92 RenderText flags and is ignored.
+     */
     public void renderText(final ImDrawList drawList, final float size, final ImVec2 pos, final int col, final ImVec4 clipRect, final String textBegin, final String textEnd, final boolean cpuFineClip) {
-        nRenderText(drawList.ptr, size, pos.x, pos.y, col, clipRect.x, clipRect.y, clipRect.z, clipRect.w, textBegin, textEnd, cpuFineClip);
+        nRenderText(drawList.ptr, size, pos.x, pos.y, col, clipRect.x, clipRect.y, clipRect.z, clipRect.w, textBegin, textEnd, 0.0f, 0);
     }
 
+    /**
+     * Compatibility overload preserved for older code. cpuFineClip no longer maps to Dear ImGui 1.92 RenderText flags and is ignored.
+     */
     public void renderText(final ImDrawList drawList, final float size, final float posX, final float posY, final int col, final float clipRectX, final float clipRectY, final float clipRectZ, final float clipRectW, final String textBegin, final String textEnd, final boolean cpuFineClip) {
-        nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, cpuFineClip);
+        nRenderText(drawList.ptr, size, posX, posY, col, clipRectX, clipRectY, clipRectZ, clipRectW, textBegin, textEnd, 0.0f, 0);
     }
 
     private native void nRenderText(long drawList, float size, float posX, float posY, int col, float clipRectX, float clipRectY, float clipRectZ, float clipRectW, String textBegin, String textEnd); /*MANUAL
@@ -530,22 +398,12 @@ public final class ImFont extends ImGuiStructDestroyable {
         if (textEnd != NULL) env->ReleaseStringUTFChars(obj_textEnd, textEnd);
     */
 
-    private native void nRenderText(long drawList, float size, float posX, float posY, int col, float clipRectX, float clipRectY, float clipRectZ, float clipRectW, String textBegin, String textEnd, float wrapWidth, boolean cpuFineClip); /*MANUAL
+    private native void nRenderText(long drawList, float size, float posX, float posY, int col, float clipRectX, float clipRectY, float clipRectZ, float clipRectW, String textBegin, String textEnd, float wrapWidth, int flags); /*MANUAL
         auto textBegin = obj_textBegin == NULL ? NULL : (char*)env->GetStringUTFChars(obj_textBegin, JNI_FALSE);
         auto textEnd = obj_textEnd == NULL ? NULL : (char*)env->GetStringUTFChars(obj_textEnd, JNI_FALSE);
         ImVec2 pos = ImVec2(posX, posY);
         ImVec4 clipRect = ImVec4(clipRectX, clipRectY, clipRectZ, clipRectW);
-        THIS->RenderText(reinterpret_cast<ImDrawList*>(drawList), size, pos, col, clipRect, textBegin, textEnd, wrapWidth, cpuFineClip);
-        if (textBegin != NULL) env->ReleaseStringUTFChars(obj_textBegin, textBegin);
-        if (textEnd != NULL) env->ReleaseStringUTFChars(obj_textEnd, textEnd);
-    */
-
-    private native void nRenderText(long drawList, float size, float posX, float posY, int col, float clipRectX, float clipRectY, float clipRectZ, float clipRectW, String textBegin, String textEnd, boolean cpuFineClip); /*MANUAL
-        auto textBegin = obj_textBegin == NULL ? NULL : (char*)env->GetStringUTFChars(obj_textBegin, JNI_FALSE);
-        auto textEnd = obj_textEnd == NULL ? NULL : (char*)env->GetStringUTFChars(obj_textEnd, JNI_FALSE);
-        ImVec2 pos = ImVec2(posX, posY);
-        ImVec4 clipRect = ImVec4(clipRectX, clipRectY, clipRectZ, clipRectW);
-        THIS->RenderText(reinterpret_cast<ImDrawList*>(drawList), size, pos, col, clipRect, textBegin, textEnd, 0.0f, cpuFineClip);
+        THIS->RenderText(reinterpret_cast<ImDrawList*>(drawList), size, pos, col, clipRect, textBegin, textEnd, wrapWidth, (ImDrawTextFlags)flags);
         if (textBegin != NULL) env->ReleaseStringUTFChars(obj_textBegin, textBegin);
         if (textEnd != NULL) env->ReleaseStringUTFChars(obj_textEnd, textEnd);
     */

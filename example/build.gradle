@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id 'application'
 }
@@ -10,12 +12,31 @@ java {
 
 application {
     mainClass = 'Main'
+
+    def resolvedLibPath = null
+
     try {
         if (libPath) {
-            applicationDefaultJvmArgs = ["-Dimgui.library.path=$libPath"]
+            resolvedLibPath = libPath
         }
     } catch (ignored) {
         // ignore
+    }
+
+    if (!resolvedLibPath) {
+        def os = OperatingSystem.current()
+        def localNativeDir = os.isWindows() ? file('../imgui-binding/build/libsNative/windows64')
+            : os.isLinux() ? file('../imgui-binding/build/libsNative/linux64')
+            : os.isMacOsX() ? file('../imgui-binding/build/libsNative/macosx64')
+            : null
+
+        if (localNativeDir != null && localNativeDir.exists()) {
+            resolvedLibPath = localNativeDir.absolutePath
+        }
+    }
+
+    if (resolvedLibPath) {
+        applicationDefaultJvmArgs = ["-Dimgui.library.path=$resolvedLibPath"]
     }
 }
 

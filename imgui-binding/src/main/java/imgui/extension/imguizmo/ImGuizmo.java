@@ -110,8 +110,8 @@ public final class ImGuizmo {
      * @param projection target camera projection
      * @param matrices   cube matrices (max. 4 cubes allowed)
      */
-    @BindingMethod
-    public static native void DrawCubes(float[] view, float[] projection, float[] matrices, @ArgValue(callValue = "(int)(env->GetArrayLength(obj_matrices)/16)") Void matrixCount);
+    @BindingMethod(callName = "DrawCubes")
+    public static native void drawCubes(float[] view, float[] projection, float[] matrices, @ArgValue(callValue = "(int)(env->GetArrayLength(obj_matrices)/16)") Void matrixCount);
 
     /**
      * Drawing an arbitrary cube in the world.
@@ -121,8 +121,8 @@ public final class ImGuizmo {
      * @param matrices    cube matrices (max. 4 cubes allowed)
      * @param matrixCount number of matrices
      */
-    @BindingMethod
-    public static native void DrawCubes(float[] view, float[] projection, float[] matrices, int matrixCount);
+    @BindingMethod(callName = "DrawCubes")
+    public static native void drawCubes(float[] view, float[] projection, float[] matrices, int matrixCount);
 
     /**
      * Drawing an arbitrary cube in the world.
