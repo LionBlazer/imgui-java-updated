@@ -1,15 +1,15 @@
 [submodule "include/imgui"]
 	path = include/imgui
-	url = https://github.com/ocornut/imgui
+	url = https://github.com/LionBlazer/imgui
 [submodule "include/imnodes"]
 	path = include/imnodes
-	url = https://github.com/Nelarius/imnodes
+	url = https://github.com/LionBlazer/imnodes
 [submodule "include/imguizmo"]
 	path = include/imguizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
 [submodule "include/implot"]
 	path = include/implot
-	url = https://github.com/epezent/implot.git
+	url = https://github.com/LionBlazer/implot
 [submodule "include/ImGuiColorTextEdit"]
 	path = include/ImGuiColorTextEdit
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit
