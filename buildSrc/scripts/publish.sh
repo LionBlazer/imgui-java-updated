@@ -7,11 +7,12 @@ cd "$BASEDIR"/../.. || exit 1
 echo "Navigated to $(pwd)"
 
 echo '> Publishing Modules...'
+NATIVE_PUBLISH_DIR="${NATIVE_PUBLISH_DIR:-out/artifacts/native-libraries}"
 
 publish_module() {
     local module=$1
     echo ">> Publishing Module [$module]"
-    ./gradlew $module:publishImguiPublicationToMavenCentralRepository
+    ./gradlew $module:publishImguiPublicationToMavenCentralRepository -PnativePublishDir="$NATIVE_PUBLISH_DIR"
     if [ $? -ne 0 ]; then
         echo "Failed to publish $module module"
         exit 1
@@ -29,7 +30,7 @@ echo '> Publishing Natives...'
 publish_natives() {
     local platform=$1
     echo ">> Publishing Natives: [$platform]"
-    ./gradlew imgui-binding-natives:publishImguiPublicationToMavenCentralRepository -PdeployType=$platform
+    ./gradlew imgui-binding-natives:publishImguiPublicationToMavenCentralRepository -PdeployType=$platform -PnativePublishDir="$NATIVE_PUBLISH_DIR"
     if [ $? -ne 0 ]; then
         echo "Failed to publish natives for $platform"
         exit 1

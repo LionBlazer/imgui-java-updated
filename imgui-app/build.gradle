@@ -29,12 +29,28 @@ dependencies {
     api project(':imgui-lwjgl3')
 }
 
+def nativePublishDir = (findProperty('nativePublishDir') ?: '../bin').toString()
+def nativeFiles = []
+[
+        file("${nativePublishDir}/windows64/imgui-java64.dll"),
+        file("${nativePublishDir}/imgui-java64.dll")
+].find { it.exists() }?.with { nativeFiles << it }
+[
+        file("${nativePublishDir}/linux64/libimgui-java64.so"),
+        file("${nativePublishDir}/libimgui-java64.so")
+].find { it.exists() }?.with { nativeFiles << it }
+[
+        file("${nativePublishDir}/macos/libimgui-java64.dylib"),
+        file("${nativePublishDir}/macosx64/libimgui-java64.dylib"),
+        file("${nativePublishDir}/libimgui-java64.dylib")
+].find { it.exists() }?.with { nativeFiles << it }
+
 jar {
-    from('../bin') {
-        include 'imgui-java64.dll'
-        include 'libimgui-java64.so'
-        include 'libimgui-java64.dylib'
-        into 'io/imgui/java/native-bin/'
+    nativeFiles.each { File nativeFile ->
+        from(nativeFile.parentFile) {
+            include nativeFile.name
+            into 'io/imgui/java/native-bin/'
+        }
     }
 
     manifest {

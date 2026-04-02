@@ -1,4 +1,45 @@
 ext.configurePublishing = { packageName, packageDesc, packageVersion ->
+    def localProps = new Properties()
+    def localPropsFile = rootProject.file('gradle-local.properties')
+    if (localPropsFile.exists()) {
+        localPropsFile.withInputStream { localProps.load(it) }
+    }
+
+    def propOrEnv = { String propName, String envName ->
+        def projectValue = project.findProperty(propName)?.toString()?.trim()
+        if (projectValue) {
+            return projectValue
+        }
+
+        def localValue = localProps.getProperty(propName)?.trim()
+        if (localValue) {
+            return localValue
+        }
+
+        return System.getenv(envName)?.trim() ?: ''
+    }
+
+    def pomUrl = project.findProperty('publishedRepoUrl')?.toString()?.trim() ?: rootProject.ext.publishedRepoUrl
+    def pomScmUrl = pomUrl.endsWith('.git') ? pomUrl : "${pomUrl}.git"
+    def developerId = project.findProperty('publishedDeveloperId')?.toString()?.trim() ?: rootProject.ext.publishedDeveloperId
+    def developerName = project.findProperty('publishedDeveloperName')?.toString()?.trim() ?: rootProject.ext.publishedDeveloperName
+    def developerEmail = project.findProperty('publishedDeveloperEmail')?.toString()?.trim() ?: localProps.getProperty('publishedDeveloperEmail', '').trim()
+    def signingKeyId = propOrEnv('signingKeyId', 'SIGNING_KEY_ID')
+    def signingKeyPass = propOrEnv('signingKeyPass', 'SIGNING_KEY_PASS')
+    if (!signingKeyPass) {
+        signingKeyPass = propOrEnv('signingPassword', 'SIGNING_KEY_PASS')
+    }
+    def signingKey = propOrEnv('signingKey', 'SIGNING_KEY')
+    if (!signingKey) {
+        def signingKeyFile = project.findProperty('signingKeyFile')?.toString()?.trim() ?: localProps.getProperty('signingKeyFile', '').trim()
+        if (signingKeyFile) {
+            def signingKeyPath = rootProject.file(signingKeyFile)
+            if (signingKeyPath.exists()) {
+                signingKey = signingKeyPath.text
+            }
+        }
+    }
+
     tasks.register('sourcesJar', Jar) {
         it.dependsOn classes
         it.archiveClassifier.set('sources')
@@ -17,14 +58,14 @@ ext.configurePublishing = { packageName, packageDesc, packageVersion ->
                 def snapshotsRepoUrl = 'https://central.sonatype.com/repository/maven-snapshots'
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                 credentials {
-                    username = System.getenv('NEXUS_UPD_ID')?.trim() ?: ''
-                    password = System.getenv('NEXUS_UPD_PASS')?.trim() ?: ''
+                    username = propOrEnv('sonatypeUsername', 'NEXUS_UPD_ID')
+                    password = propOrEnv('sonatypePassword', 'NEXUS_UPD_PASS')
                 }
             }
         }
         publications {
             imgui(MavenPublication) {
-                groupId = 'io.github.spair'
+                groupId = project.group
                 artifactId = packageName
                 version = packageVersion
 
@@ -35,7 +76,7 @@ ext.configurePublishing = { packageName, packageDesc, packageVersion ->
                 pom {
                     name = packageName
                     description = packageDesc
-                    url = 'https://github.com/SpaiR/imgui-java'
+                    url = pomUrl
                     licenses {
                         license {
                             name = 'MIT License'
@@ -44,25 +85,24 @@ ext.configurePublishing = { packageName, packageDesc, packageVersion ->
                     }
                     developers {
                         developer {
-                            id = 'SpaiR'
-                            name = 'Ilya Prymshyts'
-                            email = 'despsolver@gmail.com'
+                            id = developerId
+                            name = developerName
+                            if (developerEmail) {
+                                email = developerEmail
+                            }
                         }
                     }
                     scm {
-                        connection = 'scm:git:https://github.com/SpaiR/imgui-java.git'
-                        developerConnection = 'scm:git:https://github.com/SpaiR/imgui-java.git'
-                        url = 'https://github.com/SpaiR/imgui-java.git'
+                        connection = "scm:git:${pomScmUrl}"
+                        developerConnection = "scm:git:${pomScmUrl}"
+                        url = pomUrl
                     }
                 }
             }
         }
     }
-    if (System.getenv('SIGNING_KEY_ID') != null) {
+    if (signingKey) {
         signing {
-            def signingKeyId = System.getenv('SIGNING_KEY_ID')?.trim() ?: ''
-            def signingKey = System.getenv('SIGNING_KEY')?.trim() ?: ''
-            def signingKeyPass = System.getenv('SIGNING_KEY_PASS')?.trim() ?: ''
             useInMemoryPgpKeys(signingKeyId, signingKey, signingKeyPass)
             sign publishing.publications.imgui
         }

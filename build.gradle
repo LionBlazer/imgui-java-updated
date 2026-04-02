@@ -4,11 +4,16 @@ import java.text.SimpleDateFormat
 
 ext {
     lwjglVersion = '3.3.6'
+    publishedGroupId = 'io.github.lionblazer'
+    publishedRepoUrl = 'https://github.com/LionBlazer/imgui-java-updated'
+    publishedDeveloperId = 'LionBlazer'
+    publishedDeveloperName = 'LionBlazer'
 }
 
 allprojects {
-    group = 'imgui-java'
-    version = 'git describe --tags --always'.execute().text.trim().substring(1)
+    group = rootProject.ext.publishedGroupId
+    def gitVersion = 'git describe --tags --always'.execute().text.trim()
+    version = findProperty('releaseVersion')?.toString()?.trim() ?: (gitVersion.startsWith('v') ? gitVersion.substring(1) : gitVersion)
 
     repositories {
         mavenCentral()

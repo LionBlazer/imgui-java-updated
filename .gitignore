@@ -34,3 +34,5 @@ logs/
 build/
 out/
 !gradle/wrapper/*.jar
+/gradle-local.properties
+/private-key.asc

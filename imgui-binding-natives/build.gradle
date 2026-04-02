@@ -13,8 +13,9 @@ java {
 def packageName = 'imgui-java-natives-linux'
 def packageDesc = 'Native binaries for imgui-java binding for Linux'
 def moduleName = 'imgui.natives.linux'
-def fromDir = '../bin'
 def libName = 'libimgui-java64.so'
+def nativePublishDir = (findProperty('nativePublishDir') ?: '../bin').toString()
+def fromDir = nativePublishDir
 
 switch (findProperty('deployType')) {
     case 'windows':
@@ -22,18 +23,27 @@ switch (findProperty('deployType')) {
         packageDesc = 'Native binaries for imgui-java binding for Windows'
         moduleName = 'imgui.natives.windows'
         libName = 'imgui-java64.dll'
+        fromDir = file("${nativePublishDir}/windows64").exists() ? "${nativePublishDir}/windows64" : nativePublishDir
         break
     case 'linux':
         packageName = 'imgui-java-natives-linux'
         packageDesc = 'Native binaries for imgui-java binding for Linux'
         moduleName = 'imgui.natives.linux'
         libName = 'libimgui-java64.so'
+        fromDir = file("${nativePublishDir}/linux64").exists() ? "${nativePublishDir}/linux64" : nativePublishDir
         break
     case 'macos':
         packageName = 'imgui-java-natives-macos'
         packageDesc = 'Native binaries for imgui-java binding for macOS'
         moduleName = 'imgui.natives.macos'
         libName = 'libimgui-java64.dylib'
+        if (file("${nativePublishDir}/macos").exists()) {
+            fromDir = "${nativePublishDir}/macos"
+        } else if (file("${nativePublishDir}/macosx64").exists()) {
+            fromDir = "${nativePublishDir}/macosx64"
+        } else {
+            fromDir = nativePublishDir
+        }
         break
 }
 
