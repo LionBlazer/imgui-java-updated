@@ -24,19 +24,34 @@ ext.configurePublishing = { packageName, packageDesc, packageVersion ->
     def developerId = project.findProperty('publishedDeveloperId')?.toString()?.trim() ?: rootProject.ext.publishedDeveloperId
     def developerName = project.findProperty('publishedDeveloperName')?.toString()?.trim() ?: rootProject.ext.publishedDeveloperName
     def developerEmail = project.findProperty('publishedDeveloperEmail')?.toString()?.trim() ?: localProps.getProperty('publishedDeveloperEmail', '').trim()
+    def skipSigning = project.findProperty('skipSigning')?.toString()?.toBoolean() ?: false
     def signingKeyId = propOrEnv('signingKeyId', 'SIGNING_KEY_ID')
     def signingKeyPass = propOrEnv('signingKeyPass', 'SIGNING_KEY_PASS')
     if (!signingKeyPass) {
         signingKeyPass = propOrEnv('signingPassword', 'SIGNING_KEY_PASS')
     }
     def signingKey = propOrEnv('signingKey', 'SIGNING_KEY')
+    def signingKeyLoadedFromFile = false
     if (!signingKey) {
         def signingKeyFile = project.findProperty('signingKeyFile')?.toString()?.trim() ?: localProps.getProperty('signingKeyFile', '').trim()
         if (signingKeyFile) {
             def signingKeyPath = rootProject.file(signingKeyFile)
             if (signingKeyPath.exists()) {
                 signingKey = signingKeyPath.text
+                signingKeyLoadedFromFile = true
             }
+        }
+    }
+
+    if (project.findProperty('publishDebug')) {
+        println("publish debug [${project.path}]: skipSigning=${skipSigning}, signingKeyPresent=${!!signingKey}, signingKeyLength=${signingKey?.length() ?: 0}, signingKeyIdPresent=${!!signingKeyId}, signingKeyPassPresent=${!!signingKeyPass}, signingKeyLoadedFromFile=${signingKeyLoadedFromFile}")
+    }
+
+    tasks.withType(Javadoc).configureEach {
+        failOnError = false
+
+        if (options instanceof StandardJavadocDocletOptions) {
+            options.addStringOption('Xdoclint:none', '-quiet')
         }
     }
 
@@ -101,9 +116,13 @@ ext.configurePublishing = { packageName, packageDesc, packageVersion ->
             }
         }
     }
-    if (signingKey) {
+    if (!skipSigning && signingKey) {
         signing {
-            useInMemoryPgpKeys(signingKeyId, signingKey, signingKeyPass)
+            if (signingKeyId) {
+                useInMemoryPgpKeys(signingKeyId, signingKey, signingKeyPass ?: '')
+            } else {
+                useInMemoryPgpKeys(signingKey, signingKeyPass ?: '')
+            }
             sign publishing.publications.imgui
         }
     }

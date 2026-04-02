@@ -30,19 +30,23 @@ dependencies {
 }
 
 def nativePublishDir = (findProperty('nativePublishDir') ?: '../bin').toString()
+def nativePublishBaseDir = file(nativePublishDir)
+if (!nativePublishBaseDir.exists()) {
+    nativePublishBaseDir = rootProject.file(nativePublishDir)
+}
 def nativeFiles = []
 [
-        file("${nativePublishDir}/windows64/imgui-java64.dll"),
-        file("${nativePublishDir}/imgui-java64.dll")
+        new File(nativePublishBaseDir, 'windows64/imgui-java64.dll'),
+        new File(nativePublishBaseDir, 'imgui-java64.dll')
 ].find { it.exists() }?.with { nativeFiles << it }
 [
-        file("${nativePublishDir}/linux64/libimgui-java64.so"),
-        file("${nativePublishDir}/libimgui-java64.so")
+        new File(nativePublishBaseDir, 'linux64/libimgui-java64.so'),
+        new File(nativePublishBaseDir, 'libimgui-java64.so')
 ].find { it.exists() }?.with { nativeFiles << it }
 [
-        file("${nativePublishDir}/macos/libimgui-java64.dylib"),
-        file("${nativePublishDir}/macosx64/libimgui-java64.dylib"),
-        file("${nativePublishDir}/libimgui-java64.dylib")
+        new File(nativePublishBaseDir, 'macos/libimgui-java64.dylib'),
+        new File(nativePublishBaseDir, 'macosx64/libimgui-java64.dylib'),
+        new File(nativePublishBaseDir, 'libimgui-java64.dylib')
 ].find { it.exists() }?.with { nativeFiles << it }
 
 jar {

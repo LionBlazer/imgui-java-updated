@@ -15,7 +15,11 @@ def packageDesc = 'Native binaries for imgui-java binding for Linux'
 def moduleName = 'imgui.natives.linux'
 def libName = 'libimgui-java64.so'
 def nativePublishDir = (findProperty('nativePublishDir') ?: '../bin').toString()
-def fromDir = nativePublishDir
+def nativePublishBaseDir = file(nativePublishDir)
+if (!nativePublishBaseDir.exists()) {
+    nativePublishBaseDir = rootProject.file(nativePublishDir)
+}
+def fromDir = nativePublishBaseDir.path
 
 switch (findProperty('deployType')) {
     case 'windows':
@@ -23,26 +27,30 @@ switch (findProperty('deployType')) {
         packageDesc = 'Native binaries for imgui-java binding for Windows'
         moduleName = 'imgui.natives.windows'
         libName = 'imgui-java64.dll'
-        fromDir = file("${nativePublishDir}/windows64").exists() ? "${nativePublishDir}/windows64" : nativePublishDir
+        def windowsDir = new File(nativePublishBaseDir, 'windows64')
+        fromDir = windowsDir.exists() ? windowsDir.path : nativePublishBaseDir.path
         break
     case 'linux':
         packageName = 'imgui-java-natives-linux'
         packageDesc = 'Native binaries for imgui-java binding for Linux'
         moduleName = 'imgui.natives.linux'
         libName = 'libimgui-java64.so'
-        fromDir = file("${nativePublishDir}/linux64").exists() ? "${nativePublishDir}/linux64" : nativePublishDir
+        def linuxDir = new File(nativePublishBaseDir, 'linux64')
+        fromDir = linuxDir.exists() ? linuxDir.path : nativePublishBaseDir.path
         break
     case 'macos':
         packageName = 'imgui-java-natives-macos'
         packageDesc = 'Native binaries for imgui-java binding for macOS'
         moduleName = 'imgui.natives.macos'
         libName = 'libimgui-java64.dylib'
-        if (file("${nativePublishDir}/macos").exists()) {
-            fromDir = "${nativePublishDir}/macos"
-        } else if (file("${nativePublishDir}/macosx64").exists()) {
-            fromDir = "${nativePublishDir}/macosx64"
+        def macosDir = new File(nativePublishBaseDir, 'macos')
+        def macosX64Dir = new File(nativePublishBaseDir, 'macosx64')
+        if (macosDir.exists()) {
+            fromDir = macosDir.path
+        } else if (macosX64Dir.exists()) {
+            fromDir = macosX64Dir.path
         } else {
-            fromDir = nativePublishDir
+            fromDir = nativePublishBaseDir.path
         }
         break
 }
