@@ -140,6 +140,7 @@ public final class ImFontAtlas extends ImGuiStructDestroyable {
     /*JNI
         #ifdef IMGUI_JAVA_HAS_FREETYPE
         #include "misc/freetype/imgui_freetype.h"
+        #include "imgui_internal.h"
         #endif
      */
 
