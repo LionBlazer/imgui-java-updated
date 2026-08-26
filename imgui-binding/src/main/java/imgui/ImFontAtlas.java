@@ -138,7 +138,7 @@ public final class ImFontAtlas extends ImGuiStructDestroyable {
     // the texture (e.g. when using the AddCustomRect*** api), then the RGB pixels emitted will always be white (~75% of memory/bandwidth waste.
 
     /*JNI
-        #ifdef IMGUI_ENABLE_FREETYPE
+        #ifdef IMGUI_JAVA_HAS_FREETYPE
         #include "misc/freetype/imgui_freetype.h"
         #endif
      */
@@ -147,19 +147,19 @@ public final class ImFontAtlas extends ImGuiStructDestroyable {
      * <b>BINDING NOTICE:</b> This method is specific to the imgui-java binding.
      * <p>
      * Since FreeType is included in the final build, it's possible to use both font renderers (STB_TrueType and FreeType) simultaneously without needing to rebuild the library.
-     * By default, we use small hacks to set STB_TrueType as the default font renderer. However, this method allows you to enforce the use of the FreeType renderer.
+     * STB_TrueType is used by default. This method selects FreeType or restores STB_TrueType explicitly.
      * <p>
      * This method MUST be called before invoking the "#build" or "#getTexData*" methods.
      *
      * @param enabled true to enable the FreeType font renderer
      */
     public native void setFreeTypeRenderer(boolean enabled); /*
-        #ifdef IMGUI_ENABLE_FREETYPE
-        if (enabled) {
-            THIS->FontBuilderIO = ImGuiFreeType::GetBuilderForFreeType();
-        } else {
-            THIS->FontBuilderIO = NULL;
-        }
+        #ifdef IMGUI_JAVA_HAS_FREETYPE
+        THIS->SetFontLoader(enabled
+                ? ImGuiFreeType::GetFontLoader()
+                : ImFontAtlasGetFontLoaderForStbTruetype());
+        #else
+        IM_ASSERT(!enabled && "FreeType renderer is not included in this native library.");
         #endif
     */
 
