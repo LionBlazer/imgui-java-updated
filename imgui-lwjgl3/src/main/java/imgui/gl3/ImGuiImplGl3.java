@@ -1,16 +1,18 @@
 package imgui.gl3;
 
 import imgui.ImDrawData;
-import imgui.ImFontAtlas;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.ImGuiPlatformIO;
 import imgui.ImGuiViewport;
+import imgui.ImTextureData;
 import imgui.ImVec4;
 import imgui.callback.ImPlatformFuncViewport;
 import imgui.flag.ImGuiBackendFlags;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.flag.ImGuiViewportFlags;
-import imgui.type.ImInt;
+import imgui.flag.ImTextureFormat;
+import imgui.flag.ImTextureStatus;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
@@ -35,6 +37,7 @@ import static org.lwjgl.opengl.GL32.GL_BLEND_EQUATION_RGB;
 import static org.lwjgl.opengl.GL32.GL_BLEND_SRC_ALPHA;
 import static org.lwjgl.opengl.GL32.GL_BLEND_SRC_RGB;
 import static org.lwjgl.opengl.GL32.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL32.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL32.GL_COMPILE_STATUS;
 import static org.lwjgl.opengl.GL32.GL_CONTEXT_COMPATIBILITY_PROFILE_BIT;
 import static org.lwjgl.opengl.GL32.GL_CONTEXT_PROFILE_MASK;
@@ -69,6 +72,8 @@ import static org.lwjgl.opengl.GL32.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL32.GL_TEXTURE_BINDING_2D;
 import static org.lwjgl.opengl.GL32.GL_TEXTURE_MAG_FILTER;
 import static org.lwjgl.opengl.GL32.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL32.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL32.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL32.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL32.GL_TRUE;
 import static org.lwjgl.opengl.GL32.GL_UNPACK_ALIGNMENT;
@@ -124,6 +129,7 @@ import static org.lwjgl.opengl.GL32.glScissor;
 import static org.lwjgl.opengl.GL32.glShaderSource;
 import static org.lwjgl.opengl.GL32.glTexImage2D;
 import static org.lwjgl.opengl.GL32.glTexParameteri;
+import static org.lwjgl.opengl.GL32.glTexSubImage2D;
 import static org.lwjgl.opengl.GL32.glUniform1i;
 import static org.lwjgl.opengl.GL32.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL32.glUseProgram;
@@ -161,7 +167,6 @@ public class ImGuiImplGl3 {
         protected int glProfileMask;
         protected GLCapabilities glCapabilities = null;
         protected String glslVersion = "";
-        protected int fontTexture = 0;
         protected int shaderHandle = 0;
         protected int attribLocationTex = 0; // Uniforms location
         protected int attribLocationProjMtx = 0;
@@ -294,7 +299,7 @@ public class ImGuiImplGl3 {
         }
 
         // We can create multi-viewports on the Renderer side (optional)
-        io.addBackendFlags(ImGuiBackendFlags.RendererHasViewports);
+        io.addBackendFlags(ImGuiBackendFlags.RendererHasViewports | ImGuiBackendFlags.RendererHasTextures);
 
         if (glslVersion == null) {
             if (IS_APPLE) {
@@ -330,16 +335,13 @@ public class ImGuiImplGl3 {
         destroyDeviceObjects();
 
         io.setBackendRendererName(null);
-        io.removeBackendFlags(ImGuiBackendFlags.RendererHasVtxOffset | ImGuiBackendFlags.RendererHasViewports);
+        io.removeBackendFlags(ImGuiBackendFlags.RendererHasVtxOffset | ImGuiBackendFlags.RendererHasViewports | ImGuiBackendFlags.RendererHasTextures);
         data = null;
     }
 
     public void newFrame() {
         if (data.shaderHandle == 0) {
             createDeviceObjects();
-        }
-        if (data.fontTexture == 0) {
-            createFontsTexture();
         }
     }
 
@@ -428,6 +430,8 @@ public class ImGuiImplGl3 {
         if (fbWidth <= 0 || fbHeight <= 0) {
             return;
         }
+
+        updateTextures(drawData);
 
         if (drawData.getCmdListsCount() <= 0) {
             return;
@@ -576,42 +580,95 @@ public class ImGuiImplGl3 {
         glScissor(props.lastScissorBox[0], props.lastScissorBox[1], props.lastScissorBox[2], props.lastScissorBox[3]);
     }
 
-    public boolean createFontsTexture() {
-        final ImFontAtlas fontAtlas = ImGui.getIO().getFonts();
-
-        // Build texture atlas
-        // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders.
-        // If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
-        final ImInt width = new ImInt();
-        final ImInt height = new ImInt();
-        final ByteBuffer pixels = fontAtlas.getTexDataAsRGBA32(width, height);
-
-        final int[] lastTexture = new int[1];
-        glGetIntegerv(GL_TEXTURE_BINDING_2D, lastTexture);
-        data.fontTexture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, data.fontTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // Not on WebGL/ES
-        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0); // Not on WebGL/ES
-        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0); // Not on WebGL/ES
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); // Not on WebGL/ES
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width.get(), height.get(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-        // Store our identifier
-        fontAtlas.setTexID(data.fontTexture);
-
-        glBindTexture(GL_TEXTURE_2D, lastTexture[0]);
-
-        return true;
+    protected void updateTextures(final ImDrawData drawData) {
+        for (int index = 0; index < drawData.getTexturesCount(); index++) {
+            final ImTextureData texture = drawData.getTexture(index);
+            if (texture.getStatus() != ImTextureStatus.OK) {
+                updateTexture(texture);
+            }
+        }
     }
 
-    public void destroyFontsTexture() {
-        final ImGuiIO io = ImGui.getIO();
-        if (data.fontTexture != 0) {
-            glDeleteTextures(data.fontTexture);
-            io.getFonts().setTexID(0);
-            data.fontTexture = 0;
+    protected void updateTexture(final ImTextureData texture) {
+        final int status = texture.getStatus();
+        if (status == ImTextureStatus.WantCreate || status == ImTextureStatus.WantUpdates) {
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        }
+
+        if (status == ImTextureStatus.WantCreate) {
+            if (texture.getFormat() != ImTextureFormat.RGBA32) {
+                throw new IllegalStateException("The OpenGL3 renderer only supports RGBA32 ImGui textures");
+            }
+
+            final int[] lastTexture = new int[1];
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, lastTexture);
+            final int textureId = glGenTextures();
+            glBindTexture(GL_TEXTURE_2D, textureId);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGBA,
+                texture.getWidth(),
+                texture.getHeight(),
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                texture.getPixels()
+            );
+            texture.setTexID(textureId);
+            texture.setStatus(ImTextureStatus.OK);
+            glBindTexture(GL_TEXTURE_2D, lastTexture[0]);
+        } else if (status == ImTextureStatus.WantUpdates) {
+            final int x = texture.getUpdateX();
+            final int y = texture.getUpdateY();
+            final int width = texture.getUpdateWidth();
+            final int height = texture.getUpdateHeight();
+            final int[] lastTexture = new int[1];
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, lastTexture);
+            glBindTexture(GL_TEXTURE_2D, (int) texture.getTexID());
+            final ByteBuffer pixels = texture.getPixels();
+            pixels.position((x + y * texture.getWidth()) * texture.getBytesPerPixel());
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, texture.getWidth());
+            glTexSubImage2D(
+                GL_TEXTURE_2D,
+                0,
+                x,
+                y,
+                width,
+                height,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                pixels
+            );
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+            texture.setStatus(ImTextureStatus.OK);
+            glBindTexture(GL_TEXTURE_2D, lastTexture[0]);
+        } else if (status == ImTextureStatus.WantDestroy && texture.getUnusedFrames() > 0) {
+            destroyTexture(texture);
+        }
+    }
+
+    protected void destroyTexture(final ImTextureData texture) {
+        final long textureId = texture.getTexID();
+        if (textureId != 0) {
+            glDeleteTextures((int) textureId);
+        }
+        texture.setTexID(0);
+        texture.setStatus(ImTextureStatus.Destroyed);
+    }
+
+    protected void destroyTextures() {
+        final ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+        for (int index = 0; index < platformIO.getTexturesSize(); index++) {
+            final ImTextureData texture = platformIO.getTextures(index);
+            if (texture.getRefCount() == 1 && texture.getStatus() != ImTextureStatus.Destroyed) {
+                destroyTexture(texture);
+            }
         }
     }
 
@@ -718,8 +775,6 @@ public class ImGuiImplGl3 {
         data.vboHandle = glGenBuffers();
         data.elementsHandle = glGenBuffers();
 
-        createFontsTexture();
-
         // Restore modified GL state
         glBindTexture(GL_TEXTURE_2D, lastTexture[0]);
         glBindBuffer(GL_ARRAY_BUFFER, lastArrayBuffer[0]);
@@ -741,7 +796,7 @@ public class ImGuiImplGl3 {
             glDeleteProgram(data.shaderHandle);
             data.shaderHandle = 0;
         }
-        destroyFontsTexture();
+        destroyTextures();
     }
 
     //--------------------------------------------------------------------------------------------------------

@@ -197,6 +197,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_Y;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_PASSTHROUGH;
 import static org.lwjgl.glfw.GLFW.GLFW_NOT_ALLOWED_CURSOR;
+import static org.lwjgl.glfw.GLFW.GLFW_PLATFORM_WAYLAND;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_RESIZE_ALL_CURSOR;
@@ -227,9 +228,11 @@ import static org.lwjgl.glfw.GLFW.glfwGetMonitorContentScale;
 import static org.lwjgl.glfw.GLFW.glfwGetMonitorPos;
 import static org.lwjgl.glfw.GLFW.glfwGetMonitorWorkarea;
 import static org.lwjgl.glfw.GLFW.glfwGetMonitors;
+import static org.lwjgl.glfw.GLFW.glfwGetPlatform;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 import static org.lwjgl.glfw.GLFW.glfwGetWindowAttrib;
+import static org.lwjgl.glfw.GLFW.glfwGetWindowContentScale;
 import static org.lwjgl.glfw.GLFW.glfwGetWindowPos;
 import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
@@ -287,6 +290,7 @@ public class ImGuiImplGlfw {
         protected boolean installedCallbacks = false;
         protected boolean callbacksChainForAllWindows = false;
         protected boolean wantUpdateMonitors = true;
+        protected boolean wayland = false;
 
         // Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
         protected GLFWWindowFocusCallback prevUserCallbackWindowFocus = null;
@@ -330,6 +334,8 @@ public class ImGuiImplGlfw {
         private final int[] monitorWorkAreaHeight = new int[1];
         private final float[] monitorContentScaleX = new float[1];
         private final float[] monitorContentScaleY = new float[1];
+        private final float[] windowContentScaleX = new float[1];
+        private final float[] windowContentScaleY = new float[1];
 
         // For char translation
         private final String charNames = "`-=[]\\,;'./";
@@ -359,6 +365,7 @@ public class ImGuiImplGlfw {
     protected static final boolean glfwHasGamepadApi = glfwVersionCombined >= 3300; // 3.3+ glfwGetGamepadState() new api
     protected static final boolean glfwHasGetKeyName = glfwVersionCombined >= 3200; // 3.2+ glfwGetKeyName()
     protected static final boolean glfwHasGetError = glfwVersionCombined >= 3300; // 3.3+ glfwGetError()
+    protected static final boolean glfwHasGetPlatform = glfwVersionCombined >= 3400; // 3.4+ glfwGetPlatform()
 
     protected ImStrSupplier getClipboardTextFn() {
         return new ImStrSupplier() {
@@ -836,16 +843,20 @@ public class ImGuiImplGlfw {
     public boolean init(final long window, final boolean installCallbacks) {
         final ImGuiIO io = ImGui.getIO();
 
-        io.setBackendPlatformName("imgui-java_impl_glfw");
-        io.addBackendFlags(ImGuiBackendFlags.HasMouseCursors | ImGuiBackendFlags.HasSetMousePos | ImGuiBackendFlags.PlatformHasViewports);
-        if (glfwHasMousePassthrough || (glfwHasWindowHovered && IS_WINDOWS)) {
-            io.addBackendFlags(ImGuiBackendFlags.HasMouseHoveredViewport);
-        }
-
         data = newData();
         data.window = window;
         data.time = 0.0;
         data.wantUpdateMonitors = true;
+        data.wayland = glfwHasGetPlatform && glfwGetPlatform() == GLFW_PLATFORM_WAYLAND;
+
+        io.setBackendPlatformName("imgui-java_impl_glfw");
+        io.addBackendFlags(ImGuiBackendFlags.HasMouseCursors | ImGuiBackendFlags.HasSetMousePos);
+        if (!data.wayland) {
+            io.addBackendFlags(ImGuiBackendFlags.PlatformHasViewports);
+        }
+        if (glfwHasMousePassthrough || (glfwHasWindowHovered && IS_WINDOWS)) {
+            io.addBackendFlags(ImGuiBackendFlags.HasMouseHoveredViewport);
+        }
 
         io.setGetClipboardTextFn(getClipboardTextFn());
         io.setSetClipboardTextFn(setClipboardTextFn());
@@ -892,7 +903,7 @@ public class ImGuiImplGlfw {
         if (IS_APPLE) {
             mainViewport.setPlatformHandleRaw(GLFWNativeCocoa.glfwGetCocoaWindow(window));
         }
-        if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+        if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable) && !data.wayland) {
             initPlatformInterface();
         }
 
@@ -1134,17 +1145,35 @@ public class ImGuiImplGlfw {
                 }
             }
 
-            float dpiScale = 0;
-
-            // Warning: the validity of monitor DPI information on Windows depends on the application DPI awareness settings,
-            // which generally needs to be set in the manifest or at runtime.
-            if (glfwHasPerMonitorDpi) {
-                glfwGetMonitorContentScale(monitor, props.monitorContentScaleX, props.monitorContentScaleY);
-                dpiScale = props.monitorContentScaleX[0];
+            final float dpiScale = getContentScaleForMonitor(monitor);
+            if (dpiScale == 0.0f) {
+                continue;
             }
 
             platformIO.pushMonitors(monitor, mainPosX, mainPosY, mainSizeX, mainSizeY, workPosX, workPosY, workSizeX, workSizeY, dpiScale);
         }
+    }
+
+    /**
+     * Returns logical UI scale for a monitor. Apple and Wayland use framebuffer scale instead.
+     */
+    public float getContentScaleForMonitor(final long monitor) {
+        if (!glfwHasPerMonitorDpi || IS_APPLE || data.wayland) {
+            return 1.0f;
+        }
+        glfwGetMonitorContentScale(monitor, props.monitorContentScaleX, props.monitorContentScaleY);
+        return props.monitorContentScaleX[0];
+    }
+
+    /**
+     * Returns logical UI scale for a window. Apple and Wayland use framebuffer scale instead.
+     */
+    public float getContentScaleForWindow(final long window) {
+        if (!glfwHasPerMonitorDpi || IS_APPLE || data.wayland) {
+            return 1.0f;
+        }
+        glfwGetWindowContentScale(window, props.windowContentScaleX, props.windowContentScaleY);
+        return props.windowContentScaleX[0];
     }
 
     public void newFrame() {
@@ -1381,6 +1410,26 @@ public class ImGuiImplGlfw {
         }
     }
 
+    private static final class GetWindowFramebufferScaleFunction extends ImPlatformFuncViewportSuppImVec2 {
+        private final int[] windowWidth = new int[1];
+        private final int[] windowHeight = new int[1];
+        private final int[] framebufferWidth = new int[1];
+        private final int[] framebufferHeight = new int[1];
+
+        @Override
+        public void get(final ImGuiViewport vp, final ImVec2 dst) {
+            final ViewportData vd = (ViewportData) vp.getPlatformUserData();
+            if (vd == null) {
+                dst.set(1.0f, 1.0f);
+                return;
+            }
+            glfwGetWindowSize(vd.window, windowWidth, windowHeight);
+            glfwGetFramebufferSize(vd.window, framebufferWidth, framebufferHeight);
+            dst.x = windowWidth[0] > 0 ? (float) framebufferWidth[0] / windowWidth[0] : 1.0f;
+            dst.y = windowHeight[0] > 0 ? (float) framebufferHeight[0] / windowHeight[0] : 1.0f;
+        }
+    }
+
     private final class SetWindowSizeFunction extends ImPlatformFuncViewportImVec2 {
         private final int[] x = new int[1];
         private final int[] y = new int[1];
@@ -1495,6 +1544,7 @@ public class ImGuiImplGlfw {
         platformIO.setPlatformGetWindowPos(new GetWindowPosFunction());
         platformIO.setPlatformSetWindowPos(new SetWindowPosFunction());
         platformIO.setPlatformGetWindowSize(new GetWindowSizeFunction());
+        platformIO.setPlatformGetWindowFramebufferScale(new GetWindowFramebufferScaleFunction());
         platformIO.setPlatformSetWindowSize(new SetWindowSizeFunction());
         platformIO.setPlatformSetWindowTitle(new SetWindowTitleFunction());
         platformIO.setPlatformSetWindowFocus(new SetWindowFocusFunction());

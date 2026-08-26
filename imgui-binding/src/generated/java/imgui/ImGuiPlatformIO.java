@@ -72,6 +72,7 @@ import imgui.callback.ImPlatformFuncViewportSuppImVec2;
 public final class ImGuiPlatformIO extends ImGuiStruct {
     private static final ImGuiViewport TMP_VIEWPORT = new ImGuiViewport(0);
     private static final ImGuiPlatformMonitor TMP_MONITOR = new ImGuiPlatformMonitor(0);
+    private static final ImTextureData TMP_TEXTURE = new ImTextureData(0);
     private static final ImVec2 TMP_IM_VEC2 = new ImVec2();
 
     public ImGuiPlatformIO(final long ptr) {
@@ -229,6 +230,17 @@ public final class ImGuiPlatformIO extends ImGuiStruct {
      */
     public native void setPlatformGetWindowSize(ImPlatformFuncViewportSuppImVec2 func); /*
         IM_PLATFORM_FUNC_VIEWPORT_SUPP_IM_VEC2_METHOD_TMPL(GetWindowSize)
+    */
+
+    /*JNI
+        IM_PLATFORM_FUNC_VIEWPORT_SUPP_IM_VEC2_TMPL(GetWindowFramebufferScale)
+     */
+
+    /**
+     *  // N . . . .  // Return framebuffer pixels per logical window unit.
+     */
+    public native void setPlatformGetWindowFramebufferScale(ImPlatformFuncViewportSuppImVec2 func); /*
+        IM_PLATFORM_FUNC_VIEWPORT_SUPP_IM_VEC2_METHOD_TMPL(GetWindowFramebufferScale)
     */
 
     /*JNI
@@ -525,6 +537,19 @@ public final class ImGuiPlatformIO extends ImGuiStruct {
         TMP_MONITOR.ptr = nGetMonitors(idx);
         return TMP_MONITOR;
     }
+
+    public native int getTexturesSize(); /*
+        return IMGUI_PLATFORM_IO->Textures.Size;
+    */
+
+    public ImTextureData getTextures(final int idx) {
+        TMP_TEXTURE.ptr = nGetTextures(idx);
+        return TMP_TEXTURE;
+    }
+
+    private native long nGetTextures(int idx); /*
+        return (uintptr_t)IMGUI_PLATFORM_IO->Textures[idx];
+    */
 
     private native long nGetMonitors(int idx); /*
         return (uintptr_t)&IMGUI_PLATFORM_IO->Monitors[idx];

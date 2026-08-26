@@ -8,6 +8,8 @@ echo "Navigated to $(pwd)"
 
 echo '> Publishing Modules...'
 NATIVE_PUBLISH_DIR="${NATIVE_PUBLISH_DIR:-out/artifacts/native-libraries}"
+CENTRAL_NAMESPACE="${CENTRAL_NAMESPACE:-io.github.lionblazer}"
+CENTRAL_PUBLISHING_TYPE="${CENTRAL_PUBLISHING_TYPE:-user_managed}"
 
 publish_module() {
     local module=$1
@@ -43,7 +45,10 @@ publish_natives "windows"
 publish_natives "linux"
 publish_natives "macos"
 
-echo "> Nexus manual upload..."
-curl -D - -X POST -u "${NEXUS_UPD_ID}:${NEXUS_UPD_PASS}" "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/io.github.spair"
+echo "> Uploading staging repository to Central Portal..."
+CENTRAL_AUTH_TOKEN=$(printf '%s:%s' "$NEXUS_UPD_ID" "$NEXUS_UPD_PASS" | base64 | tr -d '\n')
+curl --fail-with-body -D - -X POST \
+    -H "Authorization: Bearer ${CENTRAL_AUTH_TOKEN}" \
+    "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${CENTRAL_NAMESPACE}?publishing_type=${CENTRAL_PUBLISHING_TYPE}"
 
 echo "All modules and natives published successfully."

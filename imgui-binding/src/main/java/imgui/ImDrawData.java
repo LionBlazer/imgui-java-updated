@@ -20,6 +20,7 @@ import java.nio.ByteOrder;
 public final class ImDrawData extends ImGuiStruct {
     private static final int RESIZE_FACTOR = 5_000;
     private static ByteBuffer dataBuffer = ByteBuffer.allocateDirect(25_000).order(ByteOrder.nativeOrder());
+    private final ImTextureData textureData = new ImTextureData(0);
 
     public ImDrawData(final long ptr) {
         super(ptr);
@@ -147,6 +148,20 @@ public final class ImDrawData extends ImGuiStruct {
     */
 
     ///////// End of Render Methods
+
+    public native int getTexturesCount(); /*
+        return THIS->Textures == nullptr ? 0 : THIS->Textures->Size;
+    */
+
+    public ImTextureData getTexture(final int index) {
+        textureData.ptr = nGetTexture(index);
+        return textureData;
+    }
+
+    private native long nGetTexture(int index); /*
+        IM_ASSERT(THIS->Textures != nullptr);
+        return (uintptr_t)(*THIS->Textures)[index];
+    */
 
     /**
      * Only valid after Render() is called and before the next NewFrame() is called.

@@ -35,6 +35,15 @@ public final class ImGuiStyle extends ImGuiStructDestroyable {
         return (uintptr_t)(new ImGuiStyle());
     */
 
+    @BindingField
+    public float FontSizeBase;
+
+    @BindingField
+    public float FontScaleMain;
+
+    @BindingField
+    public float FontScaleDpi;
+
     /**
      * Global alpha applies to everything in Dear ImGui.
      */

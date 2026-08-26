@@ -153,6 +153,14 @@ public final class ImGuiIO extends ImGuiStruct {
     @BindingField
     public boolean ConfigViewportsNoDefaultParent;
 
+    /** Automatically apply the current viewport DPI to font scaling. */
+    @BindingField
+    public boolean ConfigDpiScaleFonts;
+
+    /** Automatically resize Dear ImGui platform windows after DPI changes. */
+    @BindingField
+    public boolean ConfigDpiScaleViewports;
+
     // Miscellaneous options
 
     /**
